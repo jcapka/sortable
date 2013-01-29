@@ -35,25 +35,25 @@ Algorithm
 	* 4th - trim to 1 match
 
 
-match Manufacturer:
-	match manu field in listing and product
-	OR
-	listing has no manu AND product manu found in listing title
+* match Manufacturer:
+	* match manu field in listing and product
+	* OR
+	* listing has no manu AND product manu found in listing title
 
-match Model:
-	model variation in listing title [2]  
+* match Model:
+	* model variation in listing title [2]  
 
-match Family:
-	family matches only one model [3]
-	AND
-		family is unknown 
-		OR
-		family in listing title
-		OR
-		none of manu families in listing title [4]
+* match Family:
+	* family matches only one model [3]
+	* AND
+		* family is unknown 
+		* OR
+		* family in listing title
+		* OR
+		* none of manu families in listing title [4]
 
-trim to 1 match:
-	select product with longest model match
+* trim to 1 match:
+	* select product with longest model match
 
 Data Structure
 --------------
