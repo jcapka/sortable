@@ -27,7 +27,7 @@ The product tree is built of domain objects, and each object contains two collec
 
 Algorithm
 ---------
-* For each listing
+### For each listing
 	* 1st - match Manufacturer - no match => next listing
 	* 2nd - match all models in all families of matched manu [1]
 		  results in list of models that need to be filtered down
@@ -35,15 +35,15 @@ Algorithm
 	* 4th - trim to 1 match
 
 
-* match Manufacturer:
+### match Manufacturer:
 	* match manu field in listing and product
 	* OR
 	* listing has no manu AND product manu found in listing title
 
-* match Model:
+### match Model:
 	* model variation in listing title [2]  
 
-* match Family:
+### match Family:
 	* family matches only one model [3]
 	* AND
 		* family is unknown 
@@ -52,7 +52,7 @@ Algorithm
 		* OR
 		* none of manu families in listing title [4]
 
-* trim to 1 match:
+### trim to 1 match:
 	* select product with longest model match
 
 Data Structure
