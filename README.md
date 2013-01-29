@@ -7,6 +7,8 @@ I have made my life a little easier by keeping the code in one file. I realize p
 
 The program is dependent on the scalax.io library as IO functionality in Scala seems to be very limited from what I could find. The necessary jar files are located in the source folder, again keeping my life a little simpler. 
 
+Please note that the code does produce two warnings upon compilation. I was not too happy about this but am not sure if there is a way that they can be avoided. Beyond my Scala skills at the moment I am afraid.
+
 Running the Code
 ----------------
 
