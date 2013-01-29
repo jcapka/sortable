@@ -28,11 +28,11 @@ The product tree is built of domain objects, and each object contains two collec
 Algorithm
 ---------
 ### For each listing
-	* 1st - match Manufacturer - no match => next listing
-	* 2nd - match all models in all families of matched manu [1]
-		  results in list of models that need to be filtered down
-	* 3rd - match Family
-	* 4th - trim to 1 match
+	1. match Manufacturer - no match => next listing
+	2. match all models in all families of matched manu [1] 
+		--> results in list of models that need to be filtered down
+	3. match Family
+	4. trim to 1 match
 
 
 ### match Manufacturer:
@@ -55,6 +55,15 @@ Algorithm
 ### trim to 1 match:
 	* select product with longest model match
 
+
+[1]: Family is not always provided, ans sometimes misused (two families listed etc). Therefore the algorithm gathers all reasonable model matches across all models in all families
+
+[2]: Theoretically multiple variations are possible but never occurs in this data set. Making assumption that this will almost always be the case. If mulitiple variations are found, they are treated as one model match.
+
+[3]: If a family  matches multiple models, then the product is likely an accessory, etc
+
+[4]: Unknown family means ignore family for that model, family in listing title means good match, none of families in listing title means listing doesn't use family.
+
 Data Structure
 --------------
 <pre>
@@ -76,10 +85,3 @@ Tree
 
 
 
-[1]: Family is not always provided, ans sometimes misused (two families listed etc). Therefore the algorithm gathers all reasonable model matches across all models in all families
-
-[2]: Theoretically multiple variations are possible but never occurs in this data set. Making assumption that this will almost always be the case. If mulitiple variations are found, they are treated as one model match.
-
-[3]: If a family  matches multiple models, then the product is likely an accessory, etc
-
-[4]: Unknown family means ignore family for that model, family in listing title means good match, none of families in listing title means listing doesn't use family.
