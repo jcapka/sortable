@@ -27,12 +27,12 @@ The product tree is built of domain objects, and each object contains two collec
 
 Algorithm
 ---------
-For each listing
-	1st - match Manufacturer - no match => next listing
-	2nd - match all models in all families of matched manu [1]
+* For each listing
+	* 1st - match Manufacturer - no match => next listing
+	* 2nd - match all models in all families of matched manu [1]
 		  results in list of models that need to be filtered down
-	3rd - match Family
-	4th - trim to 1 match
+	* 3rd - match Family
+	* 4th - trim to 1 match
 
 
 match Manufacturer:
