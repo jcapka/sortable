@@ -3,29 +3,46 @@ import scalax.io._
 import scalax.file.Path
 import scalax.io.StandardOpenOption._
 
+//  Code to deal with sortable challenge. 
+//	Author: Joe Capka
+//	Date: January 2013
+object SortableChallenge{
+	def main(args: Array[String]){
 
-// Classes used when partsing the input files
-class Listing(val title:String, val manufacturer:String, val currency:String, val price:String){
-	override def toString(): String =  title 
-	
-}
-
-class Product(val name:String, val manufacturer:String, val family:String, val model:String){
-	override def toString(): String =  name 
-}
-
-class Result(val productName:String, val listings:List[Listing]){
-	override def toString(): String =  {
-		val sb  = new StringBuilder 
-		sb.append(productName).append('\n')
-		for(listing <- this.listings){
-			sb.append('\t').append(listing).append('\n')
+		if(args.length < 2){
+			println("Usage SortableChallenge <productFile> <listingFile>")
+			return
 		}
-		sb.toString
-	} 
+
+		val poductsFileName = args(0)
+		val listingsFileName = args(1)
+	
+		println("Imporing products.....")
+		val productsLines = Resource.fromFile(poductsFileName).lines()
+		val products = productsLines.toList.map(JsonHelper.productFromJson(_)).flatten
+	
+		println("Importing listings......")
+		val listingsLines = Resource.fromFile(listingsFileName).lines()
+		val listings = listingsLines.toList.map(JsonHelper.listingFormJson(_)).flatten
+		
+		println("Processing......")
+		val productTree =  new ProductTree(products)
+
+		val matchedProducts = listings.map(productTree.matchListing(_) )
+		// pair listings to matched products, filtering out the non-matches
+		val zipped = matchedProducts.zip(listings).filter( r=> r._1.isDefined )
+								
+		// iterate over the unique products that have listings associated with them and create a result object 
+		// with the product and listings extracted into the appropriate datastructures
+		val results = for(p<- matchedProducts.flatten.distinct)
+			yield(new Result(p, zipped.filter( r => r._1.get == p ).map( r => r._2) ))
+		
+		val resultsJson = JsonHelper.resultsToJson(results)
+
+		Path("results.txt").outputStream(WriteTruncate:_*).write(resultsJson)			
+	}
 	
 }
-
 
 // Product tree built using objects. Each level of the tree contains a list of the sub element keys
 // sorted in longest name first, as well as a map with the sub elements. The reason a sorted map was not used
@@ -83,8 +100,6 @@ class ProductTree(products:List[Product]){
 			// manufacturer or in case the listing has no manufacturer, look in the title
 			else
 				manuOrder.find(manu => listingManu.contains(manu) || ( listingManu == "" && listing.title.toLowerCase.contains(manu) ) )
-				//manuOrder.find(_.length == 3)
-				//None
 
 		matchedManu match {
 			case Some(manu:String) => matchFamily(manufacturers(manu), listing)
@@ -94,8 +109,6 @@ class ProductTree(products:List[Product]){
 	}
 
 	private def matchFamily(manufacturer:Manufacturer, listing:Listing): Option[String] = {
-		// TODO Implement
-		
 		val listingTitle = listing.title.toLowerCase
 
 		// get best model match(es) per family
@@ -147,15 +160,13 @@ class ProductTree(products:List[Product]){
 		// collect all model variations found, these all represent the same model
 		val variationsFound = modelVariations.filter( listingTitle contains _ )
 
-
+		// discard any that are part of some other string, etc.
 		val variationsChecked = variationsFound.filter(checkEnds(listingTitle, _))
 			
-
 		// remove all the model variations from the listing title to see if other models still present
 		val listingTitleAdjusted = removeSubstrings(listingTitle, variationsChecked)
 		
-
-		//TODO can this section below be made prettier? tired.....
+		//TODO can this section below be made somewhat more succint? 
 		val otherMatches =  if (models.tail.length >0) 
 			getMatchingModels(models.tail, listingTitleAdjusted)
 		else 
@@ -201,50 +212,27 @@ class ProductTree(products:List[Product]){
 // End Product tree
 
 
-object SortableChallenge{
-	def main(args: Array[String]){
-
-		if(args.length < 2){
-			println("Usage SortableChallenge <productFile> <listingFile>")
-			return
-		}
-
-		val poductsFileName = args(0)
-		val listingsFileName = args(1)
-
-		//TODO: The reading and opening of the two files has a few lines of ideantical code, this shold be refactored 
-		// to be in a single method somehow. Need to understand scala generics and function params better to do this refactor properly.
-		// main concern is that the .close call should be handled by the refactored function.
-		println("Imporing products.....")
-		val productsLines = Resource.fromFile(poductsFileName).lines()
-		val products = productsLines.toList.map(JsonHelper.productFromJson(_)).flatten
-		//productsFile.close()
-
-		println("Importing listings......")
-		val listingsLines = Resource.fromFile(listingsFileName).lines()
-		//val listingsFile = io.Source.fromFile(listingsFileName)
-		//val listings = listingsFile.getLines.toList.map(JsonHelper.listingFormJson(_)).flatten
-		val listings = listingsLines.toList.map(JsonHelper.listingFormJson(_)).flatten
-		//listingsFile.close()
-
-		println("Processing......")
-		val productTree =  new ProductTree(products)
-
-		val matchedProducts = listings.map(productTree.matchListing(_) )
-		val zipped = matchedProducts.zip(listings).filter( r=> r._1.isDefined )
-								
-
-		val results = for(p<- matchedProducts.flatten.distinct)
-			yield(new Result(p, zipped.filter( r => r._1.get == p ).map( r => r._2) ))
-		
-		val resultsJson = JsonHelper.resultsToJson(results)
-
-		Path("results.txt").outputStream(WriteTruncate:_*).write(resultsJson)
-
-			
-	}
-	
+// Classes used for reading and writing IO
+class Listing(val title:String, val manufacturer:String, val currency:String, val price:String){
+	override def toString(): String =  title //useful for debugging
 }
+
+class Product(val name:String, val manufacturer:String, val family:String, val model:String){
+	override def toString(): String =  name //useful for debugging
+}
+
+class Result(val productName:String, val listings:List[Listing]){
+	override def toString(): String =  {  //useful for debugging
+		val sb  = new StringBuilder 
+		sb.append(productName).append('\n')
+		for(listing <- this.listings){
+			sb.append('\t').append(listing).append('\n')
+		}
+		sb.toString
+	} 
+}
+// End IO classes
+
 
 // Singleton used to hold helper methods for json specific work 
 object JsonHelper{
