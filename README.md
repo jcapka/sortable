@@ -10,11 +10,11 @@ The program is dependent on the scalax.io library as IO functionality in scala s
 Running the Code
 ----------------
 
-1 Compile the code:
+1. Compile the code:
 	`scalac -classpath "*.jar:." SortableChallenge.scala`
-2 Run the program:
+2. Run the program:
 	`scala -classpath "*.jar:." SortableChallenge products.txt listings.txt`
-3 Find output 
+3. Find output 
 	The program outputs a file called 'results.txt' that is to the spec of the challenge. Note that while each line is valid JSON, the file itself is NOT, but this is the same as the product and listing data files. 
 
 Data Structures and Algorithms
